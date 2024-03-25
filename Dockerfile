@@ -1,8 +1,16 @@
-FROM golang:1.6-alpine
-RUN mkdir /app
-ADD . /app/
-WORKDIR /app
-RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o main .
-CMD ["/app/main"]
+FROM golang:1.21.0
 
-EXPOSE 80
+# Set destination for COPY
+WORKDIR /app
+
+ADD . /app/
+# Download Go modules
+COPY go.mod go.sum /app/
+
+RUN go mod download
+# Build
+RUN CGO_ENABLED=0 GOOS=linux go build .
+
+EXPOSE 8000
+
+CMD ["/app/apiService"]
